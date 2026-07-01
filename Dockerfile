@@ -7,17 +7,17 @@ ENV DB_HOST=database
 ENV DB_PORT=3306
 ENV DB_DATABASE=panel
 ENV DB_USERNAME=pterodactyl
-ENV DB_PASSWORD=bbytop@12
+ENV DB_PASSWORD=admin123
 
-# Install all dependencies
+# Install all dependencies with PHP 8.2
 RUN apt update && apt install -y \
     curl wget git unzip tar gnupg ca-certificates lsb-release \
     software-properties-common apt-transport-https \
     nginx mariadb-server redis-server \
-    php8.1 php8.1-cli php8.1-fpm php8.1-common \
-    php8.1-mysql php8.1-mbstring php8.1-bcmath php8.1-xml \
-    php8.1-zip php8.1-curl php8.1-gd php8.1-tokenizer \
-    php8.1-ctype php8.1-simplexml php8.1-dom \
+    php8.2 php8.2-cli php8.2-fpm php8.2-common \
+    php8.2-mysql php8.2-mbstring php8.2-bcmath php8.2-xml \
+    php8.2-zip php8.2-curl php8.2-gd php8.2-tokenizer \
+    php8.2-ctype php8.2-simplexml php8.2-dom \
     python3 python3-pip python3-venv \
     nodejs npm \
     && apt clean && rm -rf /var/lib/apt/lists/*
@@ -44,12 +44,12 @@ RUN curl -Lso panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/
 
 # Setup .env
 RUN cp .env.example .env && \
-    sed -i "s|APP_URL=.*|APP_URL=${APP_URL}|g" .env && \
-    sed -i "s|DB_HOST=.*|DB_HOST=${DB_HOST}|g" .env && \
-    sed -i "s|DB_PORT=.*|DB_PORT=${DB_PORT}|g" .env && \
-    sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|g" .env && \
-    sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|g" .env && \
-    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|g" .env && \
+    sed -i "s|APP_URL=.*|APP_URL=http://0.0.0.0:8030|g" .env && \
+    sed -i "s|DB_HOST=.*|DB_HOST=database|g" .env && \
+    sed -i "s|DB_PORT=.*|DB_PORT=3306|g" .env && \
+    sed -i "s|DB_DATABASE=.*|DB_DATABASE=panel|g" .env && \
+    sed -i "s|DB_USERNAME=.*|DB_USERNAME=pterodactyl|g" .env && \
+    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=admin123|g" .env && \
     echo "APP_ENVIRONMENT_ONLY=false" >> .env
 
 # Install PHP dependencies
@@ -74,7 +74,7 @@ RUN rm /etc/nginx/sites-enabled/default && \
         try_files $uri $uri/ /index.php?$query_string; \
     } \
     location ~ \.php$ { \
-        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock; \
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock; \
         fastcgi_index index.php; \
         include /etc/nginx/fastcgi_params; \
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
@@ -88,6 +88,6 @@ RUN curl -sSL https://raw.githubusercontent.com/pterodactyl/eggs/refs/heads/mast
     curl -sSL https://raw.githubusercontent.com/pterodactyl/eggs/refs/heads/master/generic/flask/egg-flask.json > /tmp/flask.json && \
     php artisan p:egg:import /tmp/flask.json 2>/dev/null || true
 
-EXPOSE 8030 22 443 80
+EXPOSE 8030
 
-CMD service mariadb start && service redis-server start && service php8.1-fpm start && service nginx start && tail -f /var/log/nginx/*.log
+CMD service mariadb start && service redis-server start && service php8.2-fpm start && service nginx start && tail -f /var/log/nginx/*.log
