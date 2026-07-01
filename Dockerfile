@@ -14,7 +14,7 @@ RUN apt update && apt install -y software-properties-common && \
     add-apt-repository -y ppa:ondrej/php && \
     apt update
 
-# Install all dependencies with PHP 8.2
+# Install all dependencies
 RUN apt install -y \
     curl wget git unzip tar gnupg ca-certificates lsb-release \
     apt-transport-https \
@@ -60,10 +60,11 @@ RUN cp .env.example .env && \
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate key + Migrate
-RUN php artisan key:generate --force && \
-    service mariadb start && \
-    php artisan migrate --seed --force
+# Generate key
+RUN php artisan key:generate --force
+
+# Run migrations
+RUN service mariadb start && php artisan migrate --seed --force
 
 # Create Admin User (bbytop12@gmail.com / bbytop@12)
 RUN php artisan p:user:make --email=bbytop12@gmail.com --username=bbytop12 --password="bbytop@12" --admin=1 --no-interaction
