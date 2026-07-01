@@ -9,10 +9,15 @@ ENV DB_DATABASE=panel
 ENV DB_USERNAME=pterodactyl
 ENV DB_PASSWORD=admin123
 
+# Add PHP 8.2 repository
+RUN apt update && apt install -y software-properties-common && \
+    add-apt-repository -y ppa:ondrej/php && \
+    apt update
+
 # Install all dependencies with PHP 8.2
-RUN apt update && apt install -y \
+RUN apt install -y \
     curl wget git unzip tar gnupg ca-certificates lsb-release \
-    software-properties-common apt-transport-https \
+    apt-transport-https \
     nginx mariadb-server redis-server \
     php8.2 php8.2-cli php8.2-fpm php8.2-common \
     php8.2-mysql php8.2-mbstring php8.2-bcmath php8.2-xml \
