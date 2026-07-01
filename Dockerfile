@@ -47,7 +47,7 @@ RUN curl -Lso panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/
     rm panel.tar.gz && \
     chmod -R 755 storage/* bootstrap/cache/
 
-# Setup .env FIRST
+# Setup .env
 RUN cp .env.example .env && \
     sed -i "s|APP_URL=.*|APP_URL=http://0.0.0.0:8030|g" .env && \
     sed -i "s|DB_HOST=.*|DB_HOST=database|g" .env && \
@@ -57,16 +57,16 @@ RUN cp .env.example .env && \
     sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=admin123|g" .env && \
     echo "APP_ENVIRONMENT_ONLY=false" >> .env
 
-# Generate key BEFORE composer
-RUN php artisan key:generate --force
-
-# Install PHP dependencies
+# Install Composer dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Generate key
+RUN php artisan key:generate --force
 
 # Run migrations
 RUN service mariadb start && php artisan migrate --seed --force
 
-# Create Admin User (bbytop12@gmail.com / bbytop@12)
+# Create Admin User
 RUN php artisan p:user:make --email=bbytop12@gmail.com --username=bbytop12 --password="bbytop@12" --admin=1 --no-interaction
 
 # Setup Nginx
