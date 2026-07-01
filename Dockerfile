@@ -8,7 +8,6 @@ ENV DB_PORT=3306
 ENV DB_DATABASE=panel
 ENV DB_USERNAME=pterodactyl
 ENV DB_PASSWORD=admin123
-ENV APP_KEY=base64:1234567890abcdefghijklmnopqrstuvwxyz
 
 # Add PHP 8.2 repository
 RUN apt update && apt install -y software-properties-common && \
@@ -48,7 +47,7 @@ RUN curl -Lso panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/
     rm panel.tar.gz && \
     chmod -R 755 storage/* bootstrap/cache/
 
-# Setup .env with APP_KEY pre-set
+# Setup .env
 RUN cp .env.example .env && \
     sed -i "s|APP_URL=.*|APP_URL=http://0.0.0.0:8030|g" .env && \
     sed -i "s|DB_HOST=.*|DB_HOST=database|g" .env && \
@@ -56,13 +55,12 @@ RUN cp .env.example .env && \
     sed -i "s|DB_DATABASE=.*|DB_DATABASE=panel|g" .env && \
     sed -i "s|DB_USERNAME=.*|DB_USERNAME=pterodactyl|g" .env && \
     sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=admin123|g" .env && \
-    sed -i "s|APP_KEY=.*|APP_KEY=base64:1234567890abcdefghijklmnopqrstuvwxyz|g" .env && \
     echo "APP_ENVIRONMENT_ONLY=false" >> .env
 
 # Install Composer dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate key (will use existing)
+# Generate correct APP_KEY
 RUN php artisan key:generate --force
 
 # Run migrations
